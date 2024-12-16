@@ -1,0 +1,78 @@
+install mongodb and mongoshell
+
+setup the node app -> 
+1)npm init -y 
+2)npm i express nodemon mongodb 
+3)nodemon index.js 
+4)import MongoClient from mongodb
+5)specify url 
+6)create new client by using ->  new MongoClient method and pass in your mongodb connection url to it 
+7)destructure client from the above method and use .connect method on it -> client.connect 
+8)on the client.connect method we have a try catch block 
+9)in try block we add log statement specifying the connection is successful  
+10)we select or create our databases/collections by methods on our client -> 
+client.db(dbName);// to create or select the specified database 
+db.collection(collectionName); // to create or select the specified collection 
+11)to insert in our collection we use method like insertOne etc on our collection and specify what we want to insert inside the method 
+- collection.insertOne({ name: 'John Doe', age: 30, city: 'New York' });
+12)to close connection when not needed we use client.close method () and add a closed connection log along with it 
+-> 
+        await client.close();
+        console.log('MongoDB connection closed.');
+13) now in the catch block we deal with connection errors 
+
+AND THAT IS HOW WE CONNECT AND USE MONGODB LOCALLY 
+
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Sample Setup 
+const express = require('express');
+const app = express();
+const port = 3000;
+
+const { MongoClient } = require('mongodb');// Import the MongoDB client
+const url = 'mongodb://127.0.0.1:27017'; // MongoDB connection URL
+const dbName = 'myNewDatabase'; // The database name you want to create
+const collectionName = 'myNewCollection'; // The collection name you want to create
+
+// Create a MongoClient instance
+const client = new MongoClient(url);
+
+// Connect to MongoDB and perform operations
+client.connect()
+    .then(async () => {
+        console.log('Connected successfully to MongoDB');
+
+        // Create or select the database
+        const db = client.db(dbName);
+        console.log(`Database created/selected: ${dbName}`);
+
+        // Create or select the collection
+        const collection = db.collection(collectionName);
+        console.log(`Collection created/selected: ${collectionName}`);
+
+        // Insert a document into the collection
+        const document = { name: 'John Doe', age: 30, city: 'New York' };
+        const insertResult = await collection.insertOne(document);
+        console.log('Document inserted:', insertResult.insertedId);
+
+        // Find and display the inserted document
+        const result = await collection.findOne({ _id: insertResult.insertedId });
+        console.log('Inserted Document:', result);
+
+        // Close the connection
+        await client.close();
+        console.log('MongoDB connection closed.');
+    })
+    .catch((err) => {
+        console.error('Error connecting to MongoDB:', err);
+    });
+
+
+app.get('/', (req, res) => {
+    res.send('Hello, World!');
+});
+
+app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+});
